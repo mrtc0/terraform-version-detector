@@ -113,9 +113,9 @@ func TestGetInputs(t *testing.T) {
 		{
 			name: "all inputs provided",
 			envVars: map[string]string{
-				"INPUT_PATH":             "/custom/path",
-				"INPUT_VERSION-FILE":     ".tfversion",
-				"INPUT_FALLBACK-VERSION": "1.2.3",
+				"TARGET_DIR":        "/custom/path",
+				"VERSION_FILE":      ".tfversion",
+				"FALLBACK_VERSION": "1.2.3",
 			},
 			expectedPath: "/custom/path",
 			expectedFile: ".tfversion",
@@ -131,7 +131,7 @@ func TestGetInputs(t *testing.T) {
 		{
 			name: "partial inputs",
 			envVars: map[string]string{
-				"INPUT_PATH": "/my/path",
+				"TARGET_DIR": "/my/path",
 			},
 			expectedPath: "/my/path",
 			expectedFile: ".terraform-version",

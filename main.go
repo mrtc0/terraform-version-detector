@@ -10,47 +10,42 @@ import (
 )
 
 const (
-	// Environment variable names
-	envInputPath            = "INPUT_PATH"
-	envInputVersionFile     = "INPUT_VERSION-FILE"
-	envInputFallbackVersion = "INPUT_FALLBACK-VERSION"
-	envGitHubOutput         = "GITHUB_OUTPUT"
+	envTargetDir       = "TARGET_DIR"
+	envVersionFile     = "VERSION_FILE"
+	envFallbackVersion = "FALLBACK_VERSION"
+	envGitHubOutput    = "GITHUB_OUTPUT" // default output file for GitHub Actions, if not set, will write to stdout
 
-	// Default values
 	defaultPath        = "."
 	defaultVersionFile = ".terraform-version"
-	stdoutPath         = "/dev/stdout"
+
+	stdoutPath = "/dev/stdout"
 )
 
 func main() {
-	// Get inputs from environment variables
 	path, versionFile, fallback := getInputs()
 
-	// Get output file path from GitHub Actions
 	outputFile := os.Getenv(envGitHubOutput)
 	if outputFile == "" {
-		// For local testing, use stdout
 		outputFile = stdoutPath
 	}
 
-	// Run detection
 	exitCode := run(path, versionFile, fallback, outputFile)
 	os.Exit(exitCode)
 }
 
 // getInputs reads input parameters from environment variables
 func getInputs() (path, versionFile, fallback string) {
-	path = os.Getenv(envInputPath)
+	path = os.Getenv(envTargetDir)
 	if path == "" {
 		path = defaultPath
 	}
 
-	versionFile = os.Getenv(envInputVersionFile)
+	versionFile = os.Getenv(envVersionFile)
 	if versionFile == "" {
 		versionFile = defaultVersionFile
 	}
 
-	fallback = os.Getenv(envInputFallbackVersion)
+	fallback = os.Getenv(envFallbackVersion)
 
 	return path, versionFile, fallback
 }
@@ -60,16 +55,13 @@ func run(path, versionFile, fallback, outputFile string) int {
 	// Detect version
 	result := detector.DetectVersion(path, versionFile, fallback)
 
-	// Check for errors
 	if result.Error != nil {
 		log.Printf("Error: %v", result.Error)
 		return 1
 	}
 
-	// Log success
 	log.Printf("Detected Terraform version: %s (source: %s)", result.Version, result.Source)
 
-	// Write output
 	if err := writeOutputToFile(outputFile, result); err != nil {
 		log.Printf("Failed to write output: %v", err)
 		return 1
